@@ -33,6 +33,7 @@ jobs:
       - name: Run linters
         uses: wearerequired/lint-action@v2
         with:
-          working-directory: ./siloam
+          eslint_dir: ./siloam
+          prettier_dir: ./siloam
           eslint: true
           prettier: true
