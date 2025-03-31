@@ -13,7 +13,7 @@ on:
 
 jobs:
   run-linters:
-    name: Run linters
+    name: Build and Lint Check
     runs-on: ubuntu-latest
 
     steps:
