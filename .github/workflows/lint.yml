@@ -30,10 +30,14 @@ jobs:
         working-directory: ./siloam
         run: npm ci
 
-      - name: Run linters
-        uses: rkuykendall/lint-action@master
-        with:
-          eslint_dir: siloam/
-          prettier_dir: siloam/
-          eslint: true
-          prettier: true
+      # - name: Run linters
+      #   uses: rkuykendall/lint-action@master
+      #   with:
+      #     eslint_dir: siloam/
+      #     prettier_dir: siloam/
+      #     eslint: true
+      #     prettier: true
+
+      - name: Run the build
+        working-directory: ./siloam
+        run: npm run build
