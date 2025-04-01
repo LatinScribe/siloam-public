@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Button } from 'react-native';
 import { processImageAndAudio } from '@/utils/submitAudioImage';
 import { takeAutoPhoto } from '@/utils/autoPhoto';
+import { fetchWeatherAndSpeak } from '@/utils/weather';
 
 export default function CameraHoldRel() {
   const [camPermission, requestCamPermission] = useCameraPermissions();
@@ -58,7 +59,6 @@ export default function CameraHoldRel() {
   async function handleAutoPhoto() {
     if (!cameraRef.current) return;
     console.log('Auto-capturing photo...');
-
     try {
       const photo = await cameraRef.current.takePictureAsync({
         quality: 0.1,
@@ -135,7 +135,6 @@ export default function CameraHoldRel() {
 
       if (photoUri && audioUri) {
         setMessage('Sending image+audio to backend...');
-        // Call the updated chained utility function.
         await processImageAndAudio(photoUri, audioUri);
         setMessage('Playback started!');
       } else {
@@ -154,6 +153,11 @@ export default function CameraHoldRel() {
 
   async function handlePressOut() {
     await stopAudioRecordingAndUpload();
+  }
+
+  async function handleWeather() {
+    console.log('Weather button pressed, fetching weather...');
+    await fetchWeatherAndSpeak();
   }
 
   return (
@@ -187,7 +191,8 @@ export default function CameraHoldRel() {
               {autoCaptureActive ? 'Stop Auto-Capture' : 'Start Auto-Capture'}
             </Text>
           </TouchableOpacity>
-
+          {/* Weather Button */}
+          <Button title="Get Weather" onPress={handleWeather} />
           {message && <Text style={styles.feedback}>{message}</Text>}
         </View>
       </CameraView>

@@ -1,5 +1,7 @@
 # Siloam (Real-time On-Demand Image Processing)
-​
+​[![build](https://github.com/printfn/fend/workflows/build/badge.svg)](https://github.com/csc301-2025-s/project-26-siloam/actions/workflows/lint.yml)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 > _Note:_ This project was proposed and developed by students at the University of Toronto. 
 
 ## Project Overview
@@ -17,11 +19,15 @@ This app aims to enhance independence and safety, making it easier for users to 
 * Friend UI that ergonomic and easy to use.
 ​ 
 ## Usage
-**Accessing the Application:**
-> _Note:_ Registration and login is NOT YET IMPLEMENTED and may never be depending on requirements, please ignore this section!
- * Registration: Users are required to register an account upon first use. They can do this by providing a valid email address, username, and secure password.
- * Login: After registration, users can log in using their credentials.
+**Account Registration (Optional):**
+ > _Note:_ Creating an account is optional, but it provides a better user-experience by leveraging conversation history.
+ * Registration: Users are required to [register](https://www.siloam.henrytchen.com/register) an account upon first use. They can do this by providing a valid email address, username, and secure password. 
+ * Login: After registration, users can [log in](https://www.siloam.henrytchen.com/login) using their credentials. 
  * Starting the Application: Once logged in, the application opens the camera view by default, ready for real-time object and scene detection.
+ - To view or delete interaction history, when logged in, navigate to the [interaction history](https://www.siloam.henrytchen.com/interaction-history?page=1) page, which can found under the user menu by clicking on the top right of the screen.
+ - Users can modify their account details, or delete their account at any time by using the "[Manage Profile](https://www.siloam.henrytchen.com/profile)" (accessed when logged in under the User Menu which is found at the top right of the site).
+ 
+ > _Note:_ Registration and login is only implemented for the webapp as of currently.
 
 **Using the Features (Mobile):**
 > _Note:_ There is no off the shelf mobile app yet, to try it yourself, you will need to run the project locally. See Developer instructions.
@@ -36,8 +42,10 @@ This app aims to enhance independence and safety, making it easier for users to 
 3. Ask Custom Questions:
    * Press and hold anywhere on the screen to ask questions about your surroundings
    * Ask questions like "What’s in front of me?" or "Is there a bus stop nearby?"
+4. Ask About the Weather
+   * Click the weather button and app will describe the weather conditions based on user's current location
 
-![image](https://github.com/user-attachments/assets/b782e8c4-b682-4478-a563-e5d4b2d76859)
+<img src="https://github.com/user-attachments/assets/ba544c52-e063-4cd5-aba3-dacfb6e5d656" alt="image" width="400"/>
 
 
 
@@ -58,17 +66,17 @@ https://drive.google.com/file/d/1QHqDTwz45VfII-YA_hYVgbLSKcXVhCy4/view?usp=shari
    * Navigate to: https://www.siloam.henrytchen.com/
    * You will likely be prompted to use your camera, please enable it!
    * Select a voice which you would like the audio description to use (click/tap on a voice tile).
-   * Next, click the "Analyze" Button.
+   * Next, click the Blue Circle Button above the "Tap to speak".
    * You will likely be asked to allow permission to use your microphone, please enable it!
    * The AI assistant is now listen, ask a question, or give a prompt!
-   * When you are done speaking, press the "Analyze" Button again. A photo will be taken. 
-   * Wait a few moments, and the AI will provide you with assistance (visual and audio)!
-   * To replay audio, click/tap "read again".
-   * Note: to play the audio with another voice, you must press the "Analyze" button again with the newly selected voice.
+   * When you are done speaking, please wait a few moments, and the AI will provide you a response.
+   * You can view the history of the current conversation's session under the voice option's and screen tab.
+   * Note: to play the audio with another voice, you must press the Blue Circle button again with the newly selected voice.
   
-   Example video of usage: https://drive.google.com/file/d/1Akzdujy_b5igDgg2tPyGSTpiXwW2l8s3/view?usp=sharing
-   
-  ![image](https://github.com/user-attachments/assets/c15c3e61-69c9-4768-bcfe-0649f7ffdd07)
+   Example video of usage: https://drive.google.com/file/d/14mhwT99o1sc_NtlWzr1cVgYcXvQWnxb9/view?usp=sharing
+
+  ![image](https://github.com/user-attachments/assets/a1df660e-19a3-417b-a30a-42e981d6061e)
+
 
 2. Generate your own image URL:
    * If for some reason you want to use a URL instead of directly uploading your image (i.e. TA testing), you can generate your own here.
@@ -99,6 +107,17 @@ https://drive.google.com/file/d/1QHqDTwz45VfII-YA_hYVgbLSKcXVhCy4/view?usp=shari
    * Note: to play the audio with another voice, you must press the "proccess image" button again with the newly selected voice.
 
   <img src="https://github.com/user-attachments/assets/16bfa1e6-1f46-46f7-b73b-09af11264bc0" alt="drawing" width="500"/>
+
+  **Administrator Management:**
+
+     > _Note:_ The default admin account is available for demonstration purposes. In any actual deployment, it should be removed!
+
+  * [Log in](https://www.siloam.henrytchen.com/login) using the default Administrator credentials: username: **SUDOMASTER**, password: **SUDOMaSTER123$$$**
+  - You can find additional Administrator functions under the User menu by clicking at the top right of the screen. You will find three different features:
+  1) Admin Moderation: This is currently a stub function available for future extension. On this page, you can view any flagged content and manage it.
+  2) Admin User Management: This feature allows admins to manage any account in the system. By typing in the correct username (it is case sensitive), you will be given a page to edit all details of the account. This includes modifying account emails and account permissions (i.e creating a new admin account), which is not available to the typical user.
+  3) Interaction Modification: For privacy reasons, this does NOT grant admins access to other interaction histories. It simply allows admin accounts to manually add their own interactions for development purposes.
+
 
   
  
@@ -175,6 +194,19 @@ You should see that the project is now running locally, default is: http://local
 Navigate to that link, and voila! You should have a locally deployed version of the web app running!
   <img src="https://github.com/user-attachments/assets/e665ede2-b118-4578-86f4-a685bfe74e6b" alt="drawing" width="500"/>
 
+  ### Database:
+
+  For the database and account system to function correctly, you must also have already completed the Web App set up step described above. Now, if this is a fresh deployment, you will want to rerun the startup.sh file, BUT this time enure that the lines for creating the default admin user are uncommented.
+
+  Afterwards, you can (optionally) verify/inspect the database by running:
+
+  ```bash
+npx prisma studio
+```
+This will open an interactive page in your web browser to view the current state of the database (you can also use this to easily manually modify the database).
+
+Now, if this is intended for an actual deployment, we HIGHLY recommend creating a new admin account and deleting the original default. To do this, first [create](https://www.siloam.henrytchen.com/register) a regular accoun (this will be your new admin account). Next, log in using the default admin credentials (found in the Usage Section of this readme). At the top right of the screen, click on your username to access the User Menu, underwhich select User Management. Search up your newly created account's username (be careful, this is case sensitive), and in the modifiy account menu switch the role of the new account from "User" to "Admin". Now, we highly recommend loggin in using the new account to verify that it now has administrator privledges before preceeding. Finally, while logged in as the default administrator, navigate to the User Menu again and select "Manage Profile". On this page, select the option to delete the account. All done, your new system is fully secure now!
+
 ---
 ### Deploy 
 
@@ -189,7 +221,12 @@ General Requirements:
 
 Setup instructions:
 > These instructions are similar to Developer Instruction - Web App.
-- Follow the same instructions as Developer Instruction - Web App. You will need to modify your .env variable to use your devices ip as the url (or whatever server name you end-up configuring in Nginx, see below)
+- Follow the same instructions as Developer Instruction - Web App. 
+- You will need to modify your .env variable to use your devices ip as the url (or whatever server name you end-up configuring in Nginx, see below). Note, there are 2 .env files you will need to modify, one under the siloam/ folder and one under the mobile/ folder. 
+- We also recommend modifying the secret variables in your .env file (under siloam/), to ensure that the Salt Rounds, JWT Secret, and Custom File API key is unique to your deployment for security purposes. You will also need to sign up for an OpenAI account and register the corresponding OpenAI key in the .env file.
+- Be sure the read the database section of the Developer instructions, as another reminder, do delete the old default admin credentials!
+- We recommend setting up a cron job to periodically delete stale image files. See the suggested crontab file provided under the siloam/scripts/ folder. For more details on cron, see this guide: https://www.digitalocean.com/community/tutorial-collections/how-to-use-cron-to-automate-tasks
+- In the .env file, you can also specify how long JWT tokens take before expriring. We use a access and refresh token system, where access tokens are short duration, and refresh tokens live longer to provide seamless access token refreshing. 
 
 #### Mobile app
 > _Note:_ We are still investifating the logistic of delploying the mobile app onto an app store. But, there are many online guides to deploying an expo project on your store of choice!
@@ -202,7 +239,15 @@ Setup instructions:
 - It allows complete control over server configuration, making it ideal for production environments.
 
 ### Testing
-We currently have an automated test suite called "api.test.js" that simulates api calls to our endpoints and checks for correct responses. We are currently working on migrating this test suite to properly work with our hosted backend server (not just locally). We are also investigating setting up an auto-run pipeline with Github actions. We are still working on improving overall code coverage to also test the Interfaces as well, not just the api endpoints.
+We currently have a multitude of tests, covering all parts of our CI pipeline. Github workflows are set up to automatically run the test suite, build, and lint tests on each pull request (and sometimes on commits). The linting suites we use specifically are eslint and prettier, to ensure proper typescript usage. The build test specifically checks for any compilation errors that are present in the project. Finally, we have a comprehensive test suite spread out accross api.test.js file and the tests/ folder. These tests can be run using:
+
+  ```bash
+  # run linting
+npm run lint
+
+# run test suite
+npm run test
+```
 
 ## Privacy and Security
 
@@ -212,6 +257,10 @@ Siloam is committed to user privacy and ensuring security on the platform!
 * All uploaded image files are flushed automatically after 30 minutes. This ensures user privacy, and protects against brute force scannning attacks. 
 * All image links are obsfuciated, with double hashing and randomised salt to protect against rainbow attacks. 
 * We do not collect and store user traffic data, or other personalized meta data.
+* Saving interaction history is completely optional, and is only viewable/accessible by YOU. You can view and delete your interaction history at any time under the User Menu (see Usage section of readme).
+* Connection to our backend and website is secured by https with an SSL certificate.
+* Account passwords are double hashed before being stored, to keep them safe no matter what happens.
+* All account specific endpoints are protected by JWT token authentication (all handeled seamlessly), to ensure that your account information stays private. 
 ---
 
 > _Note:_ The following sections are intended for developers and maintainers of this project. If you are only interested in deploying the project, you may skip it!
@@ -268,10 +317,20 @@ Siloam is committed to user privacy and ensuring security on the platform!
 **Merge Process**
 - Only reviewers with write access can merge pull requests after approval.
 
-## Deployment Process
+## Development Process
 
 **Code Development**
 - Write and test code locally. Local development server should be built in development mode. 
+- Write comments if code might be hard to understand. 
+- Before commiting/opening pull request, run build and lint tests. Fix any errors that appear.
+```bash
+npm run lint
+npm run build
+```
+- Before commiting/opening pull request, run test suite to ensure that no errors were introduced.
+```bash
+npm run test
+```
 
 **Create Pull Request**
 - Submit a pull request from the feature branch to `main`.
@@ -279,8 +338,14 @@ Siloam is committed to user privacy and ensuring security on the platform!
 **Review and Merge**
 - After approval, merge the pull request into `main`.
 
+**Tips & Tricks**
+- Manually delete all node modules and reinstall them periodically to ensure that you are in synch with the package.json
+- Run the development server on another window to see live results of changes.
+
 
 ## Getting Started (as a developer)
+
+Read the entire readme! It might be a long read, but it provides the best exploration of our project which is crucial to effective development! For the sake of sucintness, we will not repeat previously mentioned information here, so please do read it!!
 
 You should install node: https://nodejs.org/en/download
 

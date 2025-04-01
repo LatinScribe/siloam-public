@@ -1,11 +1,14 @@
 import { SessionContext } from "@/contexts/session";
+import { useRouter } from "next/router";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { processImage } from "@/utils/imageInterface";
+import { processImage, processImageWithHistory } from "@/utils/imageInterface";
+import { addInteraction } from "@/utils/accountInterface";
+import { verifyToken, attemptRefreshAccess, verifyTokenLocal} from "@/utils/auth";
 import { textToAudio } from "@/utils/audioInterface";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { toast } from "sonner";
-import { OpenAIVoice } from "@/utils/types";
+import { OpenAIVoice, Message } from "@/utils/types";
 import styled, { keyframes, css, createGlobalStyle } from 'styled-components';
 
 const voiceOptions: OpenAIVoice[] = ['alloy', 'echo', 'coral', 'ash']; // Define available voices
@@ -21,7 +24,7 @@ const pulse = keyframes`
     opacity: 0.8;
   }
   100% {
-    transform: scale(1);
+    transform: scale(1); 
     opacity: 1;
   }
 `;
@@ -144,14 +147,6 @@ const WaveBar = styled.div<{ delay: number }>`
   animation-delay: ${props => props.delay}s;
 `;
 
-// Add this type definition at the top of your file
-type Message = {
-  id: string;
-  sender: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-};
-
 // Add this right after your existing styled components and before the component declaration
 // This creates the custom scrollbar styles
 const GlobalStyle = createGlobalStyle`
@@ -176,6 +171,15 @@ const GlobalStyle = createGlobalStyle`
 
 export default function ImageDescribePage() {
     const { session, setSession } = useContext(SessionContext);
+    const router = useRouter();
+
+    // uncomment this if you want to force login
+    // useEffect(() => {
+    //     if (!session || !session?.accessToken || !session?.refreshToken) {
+    //         router.replace("/login");
+    //     }
+    // }, [session, router]);
+
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const [url, setUrl] = useState("");
@@ -189,6 +193,21 @@ export default function ImageDescribePage() {
     const [isSpeaking, setIsSpeaking] = useState(false); // Track if speaking is in progress
     const [debugInfo, setDebugInfo] = useState<string[]>([]);
     const [orbState, setOrbState] = useState<'idle' | 'listening' | 'processing' | 'speaking'>('idle');
+
+    const addEntryToInteractionHistory = async (type: string, question: string, imageURL: string) => {
+        if (session && session.accessToken && session.refreshToken) {
+            try {
+                const interaction = {type: type, question: question, imageURL: imageURL};
+                const interactions = await addInteraction(session.accessToken, session.refreshToken, interaction);
+            } catch (error) {
+                console.error("Error adding to interaction history:", error);
+            }
+        } else {
+            // router.push("/login");
+            console.log("User not logged in. Not saving interaction history!");
+        }
+    };
+
 
     // Create a reference for the audio element
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -240,7 +259,22 @@ export default function ImageDescribePage() {
             
             setDebugInfo(prev => [...prev, `STEP 5: Calling processImage with question: "${transcriptQuestion}"`]);
             
-            const result = await processImage(capturedUrl, transcriptQuestion);
+            //const result = await processImage(capturedUrl, transcriptQuestion);
+
+            const result = await processImageWithHistory(capturedUrl, conversationHistory, transcriptQuestion);
+
+            setConversationHistory(prev => [
+                ...prev,
+                {
+                    id: `user-${Date.now()}`,
+                    role: 'user',
+                    content: transcriptQuestion,
+                    timestamp: new Date()
+                },
+            ])
+
+            addEntryToInteractionHistory("user-question", transcriptQuestion, capturedUrl);
+
             setError("");
             setDescription(result);
             
@@ -274,18 +308,14 @@ export default function ImageDescribePage() {
                 setConversationHistory(prev => [
                     ...prev,
                     {
-                        id: `user-${Date.now()}`,
-                        sender: 'user',
-                        content: question,
-                        timestamp: new Date()
-                    },
-                    {
                         id: `assistant-${Date.now()+1}`,
-                        sender: 'assistant',
+                        role: 'assistant',
                         content: description,
                         timestamp: new Date()
                     }
                 ]);
+
+                //addEntryToInteractionHistory("assistant-response", description, "");
                 
                 await textToAudio(description, selectedVoice);
                 setCurrentStep("Response received and spoken.");
@@ -391,11 +421,11 @@ export default function ImageDescribePage() {
     return (
         <>
             <GlobalStyle /> {/* Add this to inject the styles */}
-            <div className="flex flex-col h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-black overflow-hidden">
-                {/* Background glow effect */}
-                <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px] pointer-events-none"></div>
-                <div className="absolute -top-40 -left-40 h-80 w-80 rounded-full bg-blue-500/20 blur-3xl"></div>
-                <div className="absolute -bottom-40 -right-40 h-80 w-80 rounded-full bg-purple-500/20 blur-3xl"></div>
+            <div className="flex flex-col h-screen bg-gradient-to-b from-gray-100 via-gray-50 to-white overflow-hidden">
+                {/* Background subtle grid effect */}
+                <div className="absolute inset-0 bg-grid-gray-300/[0.05] bg-[size:50px_50px] pointer-events-none"></div>
+                <div className="absolute -top-40 -left-40 h-80 w-80 rounded-full bg-blue-300/30 blur-3xl"></div>
+                <div className="absolute -bottom-40 -right-40 h-80 w-80 rounded-full bg-purple-300/30 blur-3xl"></div>
                 
                 <div className="relative z-10 w-full h-full max-w-6xl mx-auto p-6 flex flex-col">
                     {/* Maintain fixed height but with flex-shrink-0 to prevent compression */}
@@ -416,7 +446,7 @@ export default function ImageDescribePage() {
 
                         {/* Controls section */}
                         <div className="flex-1 min-w-0">
-                            <div className="bg-gray-900/60 backdrop-blur-lg rounded-2xl p-6 border border-gray-800 shadow-xl h-full flex flex-col">
+                            <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-gray-300 shadow-xl h-full flex flex-col">
                                 <OrbContainer className="flex-grow flex items-center justify-center">
                                     <Orb state={orbState} onClick={!isListening ? startListening : undefined}>
                                         {orbState === 'speaking' && (
@@ -436,13 +466,13 @@ export default function ImageDescribePage() {
                                 </OrbContainer>
 
                                 {error && (
-                                    <div className="p-3 bg-red-900/50 rounded-lg border border-red-700 text-red-200 animate-pulse text-sm mb-4">
+                                    <div className="p-3 bg-red-100 rounded-lg border border-red-300 text-red-700 animate-pulse text-sm mb-4">
                                         {error}
                                     </div>
                                 )}
 
-                                <div className="mt-auto">
-                                    <h3 className="text-lg font-medium text-white/90 mb-3">Voice Options</h3>
+                                <div className="mt-auto"> 
+                                    <h3 className="text-lg font-medium text-gray-800 dark:text-white mb-3">Voice Options</h3>
                                     <div className="grid grid-cols-2 gap-2">
                                         {voiceOptions.map((voice) => (
                                             <button
@@ -450,14 +480,14 @@ export default function ImageDescribePage() {
                                                 onClick={() => setSelectedVoice(voice)}
                                                 className={`relative group overflow-hidden p-3 rounded-xl text-sm transition-all duration-300 ${
                                                     selectedVoice === voice 
-                                                        ? 'bg-gradient-to-br from-blue-600 to-blue-800 text-white' 
-                                                        : 'bg-gray-800 hover:bg-gray-750 text-gray-300'
+                                                        ? 'bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-lg' 
+                                                        : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
                                                 }`}
                                             >
                                                 {selectedVoice === voice && (
-                                                    <span className="absolute inset-0 bg-white/10 animate-pulse-slow rounded-xl"></span>
+                                                    <span className="absolute inset-0 bg-white/20 animate-pulse-slow rounded-xl"></span>
                                                 )}
-                                                <span className="relative z-10">
+                                                <span className="relative z-10 font-medium">
                                                     {voice.charAt(0).toUpperCase() + voice.slice(1)}
                                                 </span>
                                             </button>
@@ -472,9 +502,9 @@ export default function ImageDescribePage() {
                     <div className="h-[50%] overflow-hidden">
                         {conversationHistory.length > 0 ? (
                             <div className="h-full relative group">
-                                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-blue-600 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
-                                <div className="relative h-full p-4 bg-gray-900/80 backdrop-blur-md rounded-xl border border-gray-800 shadow-xl flex flex-col">
-                                    <h3 className="text-xl font-medium text-white/90 mb-2 flex-shrink-0">Conversation</h3>
+                                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-400 to-blue-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
+                                <div className="relative h-full p-4 bg-white/90 backdrop-blur-md rounded-xl border border-gray-300 shadow-xl flex flex-col">
+                                    <h3 className="text-xl font-medium text-gray-800 dark:text-white mb-2 flex-shrink-0">Conversation</h3>
                                     
                                     {/* Make sure this container scrolls - using absolute height calculation */}
                                     <div className="h-[calc(100%-2rem)] overflow-y-auto pr-2 custom-scrollbar">
@@ -483,30 +513,30 @@ export default function ImageDescribePage() {
                                             {[...conversationHistory].reverse().map((message) => (
                                                 <div 
                                                     key={message.id} 
-                                                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                                                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                                 >
                                                     <div 
                                                         className={`
                                                             max-w-[80%] px-4 py-3 rounded-2xl 
-                                                            ${message.sender === 'user' 
-                                                                ? 'bg-blue-600 text-white rounded-tr-none' 
-                                                                : 'bg-gray-800 text-white/90 rounded-tl-none'
+                                                            ${message.role === 'user' 
+                                                                ? 'bg-blue-500 text-white rounded-tr-none' 
+                                                                : 'bg-gray-200 text-gray-800 rounded-tl-none'
                                                             }
                                                         `}
                                                     >
                                                         <p className="leading-relaxed">{message.content}</p>
-                                                        <div className={`text-xs mt-1 opacity-70 ${message.sender === 'user' ? 'text-right' : ''}`}>
-                                                            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        <div className={`text-xs mt-1 opacity-70 ${message.role === 'user' ? 'text-right' : ''}`}>
+                                                            {message.timestamp?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) ?? 'N/A'}
                                                         </div>
                                                     </div>
                                                 </div>
-                                            ))}
+                                            ))} 
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         ) : (
-                            <div className="h-full flex items-center justify-center text-gray-500">
+                            <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-300">
                                 <div className="text-center">
                                     <p>No conversation yet</p>
                                     <p className="text-sm mt-2">Tap the orb to start speaking</p>
