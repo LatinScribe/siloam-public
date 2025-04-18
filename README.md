@@ -443,6 +443,8 @@ https://www.figma.com/proto/tNsMMCYDSMgA0xa8K3RtkX/CSC301-D1-Figma?node-id=0-1&t
 Here is our figma design:
 https://www.figma.com/design/tNsMMCYDSMgA0xa8K3RtkX/CSC301-D1-Figma?node-id=0-1&t=gb8ycX1rVIVuuTe9-0
 
+---- 
+
 ### Authors:
 - Henry "TJ" Chen
 - Dereck Huynh
