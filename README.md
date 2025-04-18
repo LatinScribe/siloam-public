@@ -17,7 +17,27 @@ This app aims to enhance independence and safety, making it easier for users to 
 * Ask for description of specific object camera is focusing on.
 * Lightweight and portable across platforms.
 * Friend UI that ergonomic and easy to use.
-​ 
+
+## Video Overview
+https://drive.google.com/file/d/1tqM9VFntKKcGIyu1izSFndAOrjlEbxwq/view
+
+## Table of Contents
+
+* [How to Access and Use](#usage)
+* [How to run Locally](#developer-instructions)
+* [Run Mobile App Locally](#interactive-mobile-app)
+* [Run Web App + Backend Locally](#web-app)
+* [Run Database Locally](#database)
+* [How to Deploy](#deploy)
+* [Testing](#testing)
+* [Privacy and Security](#privacy-and-security)
+* [Coding Standards and Guidlines](#coding-standards-and-guidelines)
+* [Development Requirements](#development-requirements)
+* [Github Policies](#github-workflow)
+* [Development Policies](#development-process)
+* [Getting Started as a Developer](#getting-started-as-a-developer)
+* [Licensing](#licenses)
+
 ## Usage
 **Account Registration (Optional):**
  > _Note:_ Creating an account is optional, but it provides a better user-experience by leveraging conversation history.
@@ -51,6 +71,7 @@ This app aims to enhance independence and safety, making it easier for users to 
 
 **Here is a video demo**
 https://drive.google.com/file/d/1QHqDTwz45VfII-YA_hYVgbLSKcXVhCy4/view?usp=sharing
+
 > _Note:_ Screen recording can not capture my voice, but I asked what am I looking at for the first prompt, and how many fingers am I holding for the second. A live demo would be better suited to show the capabilities.
   
 ***Navigation Tips:***
@@ -171,6 +192,9 @@ use the camera and take pictures with it to recieve a TTS (text-to-speech) descr
 
 > _Note:_ If you wish to run the app in "developer" mode for testing and development purposes, please use the developer.sh file instead of run.sh
 
+Common errors:
+- If you get: "bash script sh cannot execute required file not found": This is likely because the text editor you opened the files with has changed the CRLF line endings. You should run "dos2unix script" where script is replaced with the relevant script name.
+
 #### Method 2. Manual
 
 * You should install node: https://nodejs.org/en/download
@@ -214,26 +238,29 @@ Now, if this is intended for an actual deployment, we HIGHLY recommend creating 
 
 General Requirements:
 
-- You should deploy this project on some device running Linux (Ubuntu is recommended).
-- This device must be accessible from a public STATIC IP address.
+- You should deploy this project on some device running Linux (Ubuntu is recommended). We recommend renting your own mini-server for this (we are using Digital Ocean droplets, but there are many alternatives!).
+- This device must be accessible from a public STATIC IP address (if you are renting a server, this should already be satisfied). 
 - For the website and API to be accessible, you will likely need to set up request routing (potentially a reverse proxy). We recommend using Nginx! However, this is not a Nginx guide! If you are not familiar with Nginx, we will refer you to the following guide: https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-20-04
 - If you want to enable https access, we suggest using OpenSSH certbot, see https://docs.digitalocean.com/support/how-do-i-install-an-ssl-certificate-on-a-droplet/
 
 Setup instructions:
 > These instructions are similar to Developer Instruction - Web App.
-- Follow the same instructions as Developer Instruction - Web App. 
+- Once you have your own linux server up and running (see above), follow the same instructions as Developer Instruction - Web App.
 - You will need to modify your .env variable to use your devices ip as the url (or whatever server name you end-up configuring in Nginx, see below). Note, there are 2 .env files you will need to modify, one under the siloam/ folder and one under the mobile/ folder. 
 - We also recommend modifying the secret variables in your .env file (under siloam/), to ensure that the Salt Rounds, JWT Secret, and Custom File API key is unique to your deployment for security purposes. You will also need to sign up for an OpenAI account and register the corresponding OpenAI key in the .env file.
 - Be sure the read the database section of the Developer instructions, as another reminder, do delete the old default admin credentials!
 - We recommend setting up a cron job to periodically delete stale image files. See the suggested crontab file provided under the siloam/scripts/ folder. For more details on cron, see this guide: https://www.digitalocean.com/community/tutorial-collections/how-to-use-cron-to-automate-tasks
-- In the .env file, you can also specify how long JWT tokens take before expriring. We use a access and refresh token system, where access tokens are short duration, and refresh tokens live longer to provide seamless access token refreshing. 
+- In the .env file, you can also specify how long JWT tokens take before expriring. We use a access and refresh token system, where access tokens are short duration, and refresh tokens live longer to provide seamless access token refreshing.
+- Again, to properly enable outside access to your website, you will likely need to set up routing (consider using Nginx). Please note that for the url generation functionality to work correctly, you must configure the routing to make the /siloam/public/uploaded-images folder publicly visible. The exact details of setting up routing depends on the specifics of your hosting service, so we are unfortunately unable to help any further here (please reach out to us for specific help). 
+- We also highly recommend registering your own Domain, and setting up SSL certification (we recommend let's encrypt as a free option) to enable secure HTTPS connections.
 
 #### Mobile app
-> _Note:_ We are still investifating the logistic of delploying the mobile app onto an app store. But, there are many online guides to deploying an expo project on your store of choice!
-- Follow Developer Instruction - mobile.
-**Deployment Tools (Suggestions)**
+> _Note:_ We are still investigating the logistic of delploying the mobile app onto an app store. But, there are many online guides to deploying an expo project on your store of choice!
+- To deploy it locally, follow Developer Instruction - mobile in the readme (see above).
 
-#### DigitalOcean Droplet
+#### Deployment Tools (Suggestions)
+
+**DigitalOcean Droplet**
 - Chosen for its flexibility and reliable hosting for full-stack applications.
 - DigitalOcean provides a scalable, cost-effective solution for hosting both backend and frontend services.
 - It allows complete control over server configuration, making it ideal for production environments.
@@ -242,12 +269,25 @@ Setup instructions:
 We currently have a multitude of tests, covering all parts of our CI pipeline. Github workflows are set up to automatically run the test suite, build, and lint tests on each pull request (and sometimes on commits). The linting suites we use specifically are eslint and prettier, to ensure proper typescript usage. The build test specifically checks for any compilation errors that are present in the project. Finally, we have a comprehensive test suite spread out accross api.test.js file and the tests/ folder. These tests can be run using:
 
   ```bash
-  # run linting
+# In /siloam/
+
+# if you haven't done so already, install node modules
+npm i
+
+# run linting
 npm run lint
 
 # run test suite
+# IMPORTANT: In a seperate terminal, please ensure that the web app is already running
+
+# In a seperate terminal, run the following
+npm run build
+npm start
+
+# In the original terminal (seperate from the one running the server)
 npm run test
 ```
+> _Note:_ Reminder that for tests to properly pass, you must have a local version of the web app open an running, see the commands above!
 
 ## Privacy and Security
 
@@ -275,6 +315,8 @@ Siloam is committed to user privacy and ensuring security on the platform!
 
 
  ## Development requirements
+ > _Note:_ The following are techstacks and hardware requirements which we strongly recommend you be familiar with for developing the project.
+
  **Operating System:** Any recent browser (Chrome, Firefox, etc), Android & iOS (mobile version)
 ### Back-end
 - **Languages:** JavaScript/TypeScript
@@ -288,13 +330,13 @@ Siloam is committed to user privacy and ensuring security on the platform!
 - **Mobile** React Native, with Expo
 
 ### Database
-- **Database Options:** PostgreSQL or SQLite
+- **Database Options:** PostgreSQL or SQLite (we recommend SQLite for development, but switching to postgreSQL for deployment)
 - **ORM:** [Prisma](https://www.prisma.io/)
 
 ### Image Recognition
 - **Processor:** GPT-4 vision processing for advanced image recognition tasks.
 - **Frameworks and Tools:**  
-  - [Cordova](https://cordova.apache.org/) or [Capacitor](https://capacitorjs.com/) for building cross-platform mobile apps  
+  - [Cordova](https://cordova.apache.org/) or [Capacitor](https://capacitorjs.com/) for building cross-platform mobile apps (optional)
   - [OpenAI](https://openai.com/) for object detection and for audio descriptions 
   - [Node.js](https://nodejs.org/) and NPM for development
 ​
@@ -322,12 +364,12 @@ Siloam is committed to user privacy and ensuring security on the platform!
 **Code Development**
 - Write and test code locally. Local development server should be built in development mode. 
 - Write comments if code might be hard to understand. 
-- Before commiting/opening pull request, run build and lint tests. Fix any errors that appear.
+- Before commiting/opening pull request, run build and lint tests (see testing section for compelete details). Fix any errors that appear.
 ```bash
 npm run lint
 npm run build
 ```
-- Before commiting/opening pull request, run test suite to ensure that no errors were introduced.
+- Before commiting/opening pull request, run test suite (see testing section for compelete details) to ensure that no errors were introduced.
 ```bash
 npm run test
 ```
@@ -347,11 +389,17 @@ npm run test
 
 Read the entire readme! It might be a long read, but it provides the best exploration of our project which is crucial to effective development! For the sake of sucintness, we will not repeat previously mentioned information here, so please do read it!!
 
+### Understanding the project flow:
+
+![image](https://github.com/user-attachments/assets/9f072b70-e434-4535-8d59-9934f13171be)
+
+As you can see in the image above, our project is broken down into 3 key stages. 1) the front-end, 2) the back-end, and 3) external APIs. Control flow starts in the front-end (either mobile or web), where users interact with our application. These interactions result in JSON requests being made to our backend web-server (notice how we have a RESTFUL design, where different front-ends interface with a unified back-end). The back-end handles/processes this request. If it needs to, it makes a request to external API's, and proceses the relevant response as well (the server acts as a proxy for the user). Finally, the server responds to the initial request with a JSON response. Upon recieving the relevant response, the front-end updates accordingly, and the cycle repeats! Again, our front-ends are seperate (see the /mobile and /siloam folders), but the backend is completely unified (under the /siloam folder). 
+
+#### Running the development server:
+
 You should install node: https://nodejs.org/en/download
 
 Open up the project in your favourite IDE, we recommend VScode. 
-
-#### Running the development server:
 
 ```bash
 npm i

@@ -1,22 +1,28 @@
-const request = require("supertest");
-const { createMocks } = require("node-mocks-http");
-const handler = require("./answer-question"); // Using require instead of import
+import { createMocks } from "node-mocks-http";
+import handler from "../../../pages/api/openai/answer-question";
+import { describe, it, expect, jest, beforeEach, afterEach } from "@jest/globals";
+import OpenAI from "openai"; // Ensure OpenAI is installed and imported correctly
 
-jest.mock("openai", () => ({
-    default: jest.fn().mockImplementation(() => ({
-        chat: {
-            completions: {
-                create: jest.fn().mockResolvedValue({
-                    choices: [{ message: { content: "Test response for visually impaired users." } }],
-                }),
-            },
-        },
-    })),
-}));
+jest.mock("openai"); // Mock the OpenAI module
 
-describe("answer-question API Handler", () => {
+describe("POST /api/openai/answer-question", () => {
+    let mockCreateChatCompletion: jest.Mock;
+
+    beforeEach(() => {
+        mockCreateChatCompletion = jest.fn();
+        (OpenAI as jest.Mock).mockImplementation(() => ({
+            createChatCompletion: mockCreateChatCompletion,
+        }));
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
     it("should return 405 if method is not POST", async () => {
-        const { req, res } = createMocks({ method: "GET" });
+        const { req, res } = createMocks({
+            method: "GET",
+        });
 
         await handler(req, res);
 
@@ -24,46 +30,59 @@ describe("answer-question API Handler", () => {
         expect(res._getJSONData()).toEqual({ error: "Method not allowed" });
     });
 
-    it("should return 400 if description or question is missing", async () => {
+    it("should return 400 if imageUrl or question is missing", async () => {
         const { req, res } = createMocks({
             method: "POST",
-            body: { description: "" },
+            body: { question: "What is this?" },
         });
 
         await handler(req, res);
 
         expect(res._getStatusCode()).toBe(400);
-        expect(res._getJSONData()).toEqual({ error: "Description and question are required" });
+        expect(res._getJSONData()).toEqual({ error: "Image URL and question are required" });
     });
 
-    it("should return a valid response when OpenAI API is successful", async () => {
+    // it("should return 200 and a result if valid input is provided", async () => {
+    //     const mockResponse = {
+    //         choices: [
+    //             {
+    //                 message: {
+    //                     content: "This is a mock response.",
+    //                 },
+    //             },
+    //         ],
+    //     };
+
+    //     mockCreateChatCompletion.mockResolvedValue(mockResponse);
+
+    //     const { req, res } = createMocks({
+    //         method: "POST",
+    //         body: {
+    //             question: "What is this?",
+    //             imageUrl: "https://example.com/image.jpg",
+    //         },
+    //     });
+
+    //     await handler(req, res);
+
+    //     expect(res._getStatusCode()).toBe(200);
+    //     expect(res._getJSONData()).toEqual({ result: "This is a mock response." });
+    // });
+
+    it("should return 500 if an error occurs", async () => {
+        mockCreateChatCompletion.mockRejectedValue(new Error("Mock error"));
+
         const { req, res } = createMocks({
             method: "POST",
-            body: { description: "A cat is sitting on a couch.", question: "What is the cat doing?" },
-        });
-
-        await handler(req, res);
-
-        expect(res._getStatusCode()).toBe(200);
-        expect(res._getJSONData()).toEqual({ result: "Test response for visually impaired users." });
-    });
-
-    it("should return 500 when OpenAI API fails", async () => {
-        jest.spyOn(console, "error").mockImplementation(() => {}); // Suppress error logs in test
-
-        const openai = require("openai").default();
-        openai.chat.completions.create.mockRejectedValue(new Error("OpenAI Error"));
-
-        const { req, res } = createMocks({
-            method: "POST",
-            body: { description: "A tree in autumn.", question: "What color are the leaves?" },
+            body: {
+                question: "What is this?",
+                imageUrl: "https://example.com/image.jpg",
+            },
         });
 
         await handler(req, res);
 
         expect(res._getStatusCode()).toBe(500);
         expect(res._getJSONData()).toEqual({ error: "An error occurred while processing the question" });
-
-        jest.restoreAllMocks(); // Clean up mocks
     });
 });

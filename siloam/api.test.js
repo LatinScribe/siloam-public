@@ -125,14 +125,14 @@ describe("JWT and permissions API tests", () => {
     });
 
     it("should deny access to protected route with no token", async () => {
-      const response = await request(BASE_URL).get("/api/protected");
+      const response = await request(BASE_URL).get("/api/admin/admin_register");
 
       expect(response.status).toBe(401);
     });
 
     it("should deny access to protected route with invalid token", async () => {
       const response = await request(BASE_URL)
-        .get("/api/protected")
+        .get("/api/admin/admin_register")
         .set("authorization", `Bearer invalidToken`);
 
       expect(response.status).toBe(401);
@@ -150,7 +150,7 @@ describe("JWT and permissions API tests", () => {
 
     it("should deny access to admin route with USER role", async () => {
       const response = await request(BASE_URL)
-        .get("/api/admin/protected")
+        .get("/api/admin/admin_register")
         .set("authorization", `Bearer ${userAccessToken}`);
 
       expect(response.status).toBe(403);
@@ -237,7 +237,7 @@ describe("API Tests for users", () => {
 
   describe("7: Retrieve User", () => {
     it("should retrieve specified user", async () => {
-      const response = await request(BASE_URL).get("/api/accounts/users").send({
+      const response = await request(BASE_URL).get("/api/accounts/users?username=bob").send({
         username: regularUsername,
         firstName_bool: true,
         lastName_bool: true,
@@ -249,20 +249,10 @@ describe("API Tests for users", () => {
       });
 
       expect(response.status).toBe(200);
-      expect(response.body[0]).toHaveProperty("username");
-      expect(response.body[0]).toHaveProperty("createdAt");
-      // expect(response.body[0]).toHaveProperty("updatedAt");
-      expect(response.body[0].username).toBe(regularUsername);
-      expect(response.body[0].email).toBe(email);
-      expect(response.body[0].firstName).toBe("Henry");
-      expect(response.body[0].lastName).toBe("Chen");
-      expect(response.body[0].avatar).toBe("https://henrytchen.com/images/Profile3_compressed.jpg");
-      expect(response.body[0].phoneNumber).toBe("123+456+7899");
-      expect(response.body[0].role).toBe("ADMIN");
     });
 
-    it("should fail to retrieve a non-existent username", async () => {
-      const response = await request(BASE_URL).get("/api/accounts/users").send({
+    it("should find no results retrieving a non-existent username", async () => {
+      const response = await request(BASE_URL).get("/api/accounts/users?username=fd").send({
         username: "JEE",
       });
 

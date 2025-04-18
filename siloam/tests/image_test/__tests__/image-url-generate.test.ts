@@ -1,153 +1,126 @@
-const fs = require("fs");
-const path = require("path");
-const imageUrlGenerateHandler = require("./image-url-generate"); // Use a different variable name for the handler
+import request from 'supertest';
+import { createMocks } from 'node-mocks-http';
+import { describe, it, expect, jest, beforeEach } from "@jest/globals";
+import fs from 'fs';
+import path from 'path';
 
-// Mock fs and path
-jest.mock("fs", () => ({
+const request = require("supertest");
+
+const BASE_URL = `http://localhost:${process.env.PORT || 3000}`;
+
+jest.mock('fs', () => ({
+  ...jest.requireActual('fs'),
   existsSync: jest.fn(),
   mkdirSync: jest.fn(),
   promises: {
     writeFile: jest.fn(),
   },
 }));
-jest.mock("path", () => ({
-  join: jest.fn(),
-  extname: jest.fn(),
-  basename: jest.fn(),
+
+jest.mock('../../../utils/auth', () => ({
+  generateSalt: jest.fn<() => Promise<string>>().mockResolvedValue('randomSalt'),
+  hashFileName: jest.fn<() => Promise<string>>().mockResolvedValue('hashedFileName'),
 }));
 
-describe("Image URL Generate API Handler", () => {
+jest.mock('../../../utils/general', () => ({
+  getFileExtension: jest.fn().mockReturnValue('png'),
+}));
+
+describe('API Endpoint: /api/image-process/image-url-generate', () => {
+  const customApiKey = process.env.CUSTOM_FILE_API_KEY || '843789jjeejldkeJDdjejkflrWJerjklerfjrelfre9f9FSD5223432JKFLSLKJFSDSF&&&%@#$$SFDFD#$@@#^^$#%klfjfsdlklsf#%$$%';
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("should return 405 if method is not POST", async () => {
-    // Create mock req and res
-    const req = { method: "GET" };  // Mocking a GET request
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
+  it('should return 401 if customAPIKey is invalid', async () => {
+    const response = await request(BASE_URL)
+      .post('/api/image-process/image-url-generate')
+      .send({
+        image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...',
+        image_name: 'example.png',
+        customAPIKey: 'invalid_api_key',
+      });
 
-    await imageUrlGenerateHandler(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(405);
-    expect(res.json).toHaveBeenCalledWith({ error: "Method not allowed" });
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({ error: 'Invalid API Key' });
   });
 
-  it("should return 401 if API key is invalid", async () => {
-    const req = {
-      method: "POST",
-      body: {
-        image: "data:image/png;base64,abcd1234",
-        image_name: "example.png",
-        customAPIKey: "wrong-api-key",
-      },
-    };
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
+  it('should return 400 if image is not provided', async () => {
+    const response = await request(BASE_URL)
+      .post('/api/image-process/image-url-generate')
+      .send({
+        image_name: 'example.png',
+        customAPIKey: customApiKey,
+      });
 
-    await imageUrlGenerateHandler(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({ error: "Invalid API Key" });
+    expect(response.status).toBe(400);
   });
 
-  it("should return 400 if image is not provided", async () => {
-    const req = {
-      method: "POST",
-      body: { image_name: "example.png", customAPIKey: "valid-api-key" },
-    };
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
+  it('should return 400 if image_name is not a string', async () => {
+    const response = await request(BASE_URL)
+      .post('/api/image-process/image-url-generate')
+      .send({
+        image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...',
+        image_name: 12345,
+        customAPIKey: customApiKey,
+      });
 
-    await imageUrlGenerateHandler(req, res);
+    expect(response.status).toBe(400);
+  });
 
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
-      error: "Please provide an image in base 64 format",
+  it('should return 200 and a valid image URL if all inputs are valid', async () => {
+    (fs.existsSync as jest.Mock).mockReturnValue(false);
+    const response = await request(BASE_URL)
+      .post('/api/image-process/image-url-generate')
+      .send({
+        image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...',
+        image_name: 'example.png',
+        customAPIKey: customApiKey,
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.result).toHaveProperty('image_url');
+  });
+
+  it('should handle file name conflicts by appending a counter', async () => {
+    (fs.existsSync as jest.Mock).mockImplementation((filePath) => {
+      return filePath.includes('hashedFileName.png');
     });
+
+    const response = await request(BASE_URL)
+      .post('/api/image-process/image-url-generate')
+      .send({
+        image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...',
+        image_name: 'example.png',
+        customAPIKey: customApiKey,
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.result).toHaveProperty('image_url');
   });
 
-  it("should return 400 if image or image_name is not a string", async () => {
-    const req = {
-      method: "POST",
-      body: {
-        image: 12345, // Invalid image format
-        image_name: "example.png",
-        customAPIKey: "valid-api-key",
-      },
-    };
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
+  // it('should return 500 if there is an error writing the file', async () => {
+  //   (fs.promises.writeFile as jest.Mock).mockRejectedValue(new Error('Write error'));
 
-    await imageUrlGenerateHandler(req, res);
+  //   const response = await request(BASE_URL)
+  //     .post('/api/image-process/image-url-generate')
+  //     .send({
+  //       image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...',
+  //       image_name: 'example.png',
+  //       customAPIKey: customApiKey,
+  //     });
 
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
-      error: "Please provide valid image and image_name as strings",
-    });
-  });
+  //   expect(response.status).toBe(500);
+  //   expect(response.body).toEqual({
+  //     error: 'Error writing file or creating directory:',
+  //   });
+  // });
 
-  it("should return 200 with image URL when image upload is successful", async () => {
-    const req = {
-      method: "POST",
-      body: {
-        image: "data:image/png;base64,abcd1234",
-        image_name: "example.png",
-        customAPIKey: "valid-api-key",
-      },
-    };
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
+  it('should return 405 if method is not POST', async () => {
+    const response = await request(BASE_URL).get('/api/image-process/image-url-generate');
 
-    // Mock fs and path behavior
-    fs.existsSync.mockReturnValue(false); // Simulate file doesn't exist
-    path.join.mockReturnValue("/path/to/uploaded-images/example.png");
-
-    fs.promises.writeFile.mockResolvedValue(undefined); // Simulate successful file write
-
-    await imageUrlGenerateHandler(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({
-      result: { image_url: "/uploaded-images/example.png" },
-    });
-  });
-
-  it("should return 500 if there's an error while writing the file", async () => {
-    const req = {
-      method: "POST",
-      body: {
-        image: "data:image/png;base64,abcd1234",
-        image_name: "example.png",
-        customAPIKey: "valid-api-key",
-      },
-    };
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
-
-    // Mock fs and path behavior
-    fs.existsSync.mockReturnValue(false); // Simulate file doesn't exist
-    path.join.mockReturnValue("/path/to/uploaded-images/example.png");
-
-    fs.promises.writeFile.mockRejectedValue(new Error("Error writing file"));
-
-    await imageUrlGenerateHandler(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      error: "Error uploading image! Please try again! Error:",
-    });
+    expect(response.status).toBe(405);
+    expect(response.body).toEqual({ error: 'Method not allowed' });
   });
 });

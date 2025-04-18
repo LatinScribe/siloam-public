@@ -41,11 +41,11 @@ export default function CameraHoldRel() {
   }
 
   function startAutoCapture() {
-    console.log('Starting auto-capture every 30s...');
+    console.log('Starting auto-capture every 45s...'); // Can adjust based on latency
     handleAutoPhoto();
     intervalRef.current = setInterval(() => {
       handleAutoPhoto();
-    }, 100000);
+    }, 45000);
   }
 
   function stopAutoCapture() {
