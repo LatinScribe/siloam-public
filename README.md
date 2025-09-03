@@ -191,10 +191,11 @@ use the camera and take pictures with it to recieve a TTS (text-to-speech) descr
 ./run.sh
 ```
 
-> _Note:_ If you wish to run the app in "developer" mode for testing and development purposes, please use the developer.sh file instead of run.sh
+> [!NOTE]
+> If you wish to run the app in "developer" mode for testing and development purposes, please use the developer.sh file instead of run.sh
 
-Common errors:
-- If you get: "bash script sh cannot execute required file not found": This is likely because the text editor you opened the files with has changed the CRLF line endings. You should run "dos2unix script" where script is replaced with the relevant script name.
+> [!TIP]
+> If you encounter the error `"bash script sh cannot execute required file not found"` or `"bad interpreter"`, your text editor may have changed the script's line endings to CRLF. Run `dos2unix script` (replace `script` with the relevant filename) to fix this.
 
 #### Method 2. Manual
 
