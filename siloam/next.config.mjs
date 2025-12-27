@@ -18,6 +18,14 @@ const nextConfig = {
     API_URL: process.env.API_URL,
     SERVER_URL: process.env.SERVER_URL,
   },
+  onDemandEntries: {
+    maxInactiveAge: 60 * 1000,
+    pagesBufferLength: 5,
+  },
+  devIndicators: {
+    buildActivityPosition: 'bottom-right',
+  },
+  allowedDevOrigins: ['localhost:3000', 'localhost:3001', 'localhost:3010'],
   // Removed deprecated experimental block
 };
 
