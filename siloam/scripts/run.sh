@@ -13,4 +13,4 @@ npm run build
 
 # Start the application
 echo "Starting the application..."
-npm start
+npm start -- --port 3010

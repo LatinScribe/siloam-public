@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+//  url      = env("DATABASE_URL") // this is deprecated in new prisma version
 }
 
 // user and blogging models
