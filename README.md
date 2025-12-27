@@ -288,6 +288,8 @@ npm run build
 npm start
 
 # In the original terminal (seperate from the one running the server)
+npm install jest # install jest since not bundeled
+npm install ts-jest # install ts-jest since not bundeled
 npm run test
 ```
 > _Note:_ Reminder that for tests to properly pass, you must have a local version of the web app open an running, see the commands above!
