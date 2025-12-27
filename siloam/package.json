@@ -54,6 +54,7 @@
     "styled-components": "^6.1.19",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
+    "ts-jest": "^29.4.6",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
@@ -63,12 +64,10 @@
     "@types/react-dom": "^19.2.3",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@types/styled-components": "^5.1.36",
-    "jest": "^30.2.0",
     "postcss": "^8.5.6",
     "puppeteer": "^24.34.0",
     "supertest": "^7.1.4",
     "tailwindcss": "^4.1.18",
-    "ts-jest": "^29.4.6",
     "typescript": "^5.9.3"
   },
   "jest": {
