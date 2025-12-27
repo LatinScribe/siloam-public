@@ -25,7 +25,7 @@ const nextConfig = {
   devIndicators: {
     buildActivityPosition: 'bottom-right',
   },
-  allowedDevOrigins: ['localhost:3000', 'localhost:3001', 'localhost:3010'],
+  allowedDevOrigins: ['localhost:3000', 'localhost:3001', 'localhost:3010', 'siloam.henrytchen.com'],
   // Removed deprecated experimental block
 };
 
