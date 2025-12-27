@@ -196,6 +196,7 @@ use the camera and take pictures with it to recieve a TTS (text-to-speech) descr
 
 > [!TIP]
 > If you encounter the error `"bash script sh cannot execute required file not found"` or `"bad interpreter"`, your text editor may have changed the script's line endings to CRLF. Run `dos2unix script` (replace `script` with the relevant filename) to fix this.
+> If you encounter the error `-bash: ./FILE_NAME.sh: Permission denied`, you probably need to make the shell file executable using: `chmod u+x FILE_NAME.sh`
 
 #### Method 2. Manual
 
