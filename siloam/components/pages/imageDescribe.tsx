@@ -225,9 +225,17 @@ export default function ImageDescribePage() {
     }, []);
 
     const startCamera = async () => {
-        if (videoRef.current) {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            videoRef.current.srcObject = stream;
+        if (videoRef.current && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoRef.current.srcObject = stream;
+            } catch (err) {
+                console.error("Error accessing camera:", err);
+                toast.error("Unable to access camera. Please check permissions.");
+            }
+        } else {
+            console.error("MediaDevices API is not supported in this browser or environment");
+            toast.error("Camera access is not supported in your browser");
         }
     };
 
