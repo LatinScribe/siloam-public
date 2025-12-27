@@ -77,7 +77,14 @@ export async function processImageWithHistory(imageUrl: string, conversation: Me
         });
 
         if (!response.ok) {
-            throw new Error('Failed to process image');
+            // Handle non-OK responses
+            // check if error is quota exceeded
+            if (response.status === 429) {
+                throw new Error('Uh oh... OpenAI API quota exceeded :(');
+
+            } else {
+                throw new Error('Failed to process image with history');
+            }
         }
         
         const data = await response.json();

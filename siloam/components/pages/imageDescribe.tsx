@@ -290,10 +290,17 @@ export default function ImageDescribePage() {
             
             setCurrentStep("Generating Text To Speech...");
         } catch (err: any) {
-            setError(err.message || "An error occurred while processing the image");
-            toast.error("An error occurred while processing the image");
-            setDebugInfo(prev => [...prev, `ERROR: ${err.message || "Unknown error processing image"}`]);
-            setOrbState('idle'); // Return to idle state on error
+            // if error is run out of quota
+            if (err.message && err.message.includes('quota exceeded')) {
+                setError("Uh oh... OpenAI API quota exceeded :(");
+                toast.error("Uh oh... OpenAI API quota exceeded :(");
+                setDebugInfo(prev => [...prev, `ERROR: OpenAI API quota exceeded`]);
+            } else {
+                setError(err.message || "An error occurred while processing the image");
+                toast.error("An error occurred while processing the image");
+                setDebugInfo(prev => [...prev, `ERROR: ${err.message || "Unknown error processing image"}`]);
+                setOrbState('idle'); // Return to idle state on error
+            }
         }
     };
 

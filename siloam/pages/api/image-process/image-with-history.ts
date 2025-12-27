@@ -67,8 +67,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Call OpenAI API to generate a concise final response
         console.log("Sending to OpenAI with model gpt-4o-mini");
-        console.log("System prompt:", system_prompt.substring(0, 100) + "...");
-        console.log("User message:", request ? `Please directly answer this question about the image: "${request}"` : "What am I looking at?");
+        // console.log("System prompt:", system_prompt.substring(0, 100) + "...");
+        // console.log("User message:", request ? `Please directly answer this question about the image: "${request}"` : "What am I looking at?");
 
         // Collate the history with the current request
         const systemPrompt: Message[] = [
@@ -106,12 +106,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         console.log("OpenAI response received");
         console.log("Image processed successfully!");
-        console.log("Response:", response);
+        // console.log("Response:", response);
 
         // Return both responses as a JSON object
         return res.status(200).json({ response: response});
     } catch (error) {
         console.error("Error processing image:", error);
+        
+        // Handle rate limit (429) and quota exceeded errors
+        if (error instanceof Error && 'status' in error && error.status === 429) {
+            return res.status(429).json({ error: "API quota exceeded. Please try again later." });
+        }
+        
         return res.status(500).json({ error: "An error occurred while requesting OpenAI to process the image" });
     }
 }
