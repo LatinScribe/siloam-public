@@ -45,6 +45,15 @@ npm i
 
 # ------------ DATABASE SETUP ------------
 
+# check if sqlite3 is installed
+if ! command -v sqlite3 &> /dev/null
+then
+    echo "sqlite3 is not installed. Installing sqlite3..."
+    sudo apt-get install -y sqlite3
+else
+    echo "sqlite3 is already installed."
+fi
+
 echo setting up database...
 cd ..
 npx prisma generate
