@@ -203,7 +203,7 @@ cp .env.example .env
 
 #### Method 2. Manual
 
-* You should install node: https://nodejs.org/en/download
+* You should install Node 26, the version in `siloam/.nvmrc`: https://nodejs.org/en/download
 * At this point, you should be able to run "npm help"
 
 First, install dependencies (node modules):
@@ -409,7 +409,7 @@ As you can see in the image above, our project is broken down into 3 key stages.
 
 #### Running the development server:
 
-You should install node: https://nodejs.org/en/download
+You should install Node 26, the version in `siloam/.nvmrc`: https://nodejs.org/en/download
 
 Open up the project in your favourite IDE, we recommend VScode. 
 

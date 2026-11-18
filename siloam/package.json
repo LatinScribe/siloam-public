@@ -88,5 +88,8 @@
     "transform": {
       "^.+\\.(ts|tsx)$": "ts-jest"
     }
+  },
+  "engines": {
+    "node": ">=26"
   }
 }
