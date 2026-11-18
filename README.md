@@ -177,8 +177,11 @@ use the camera and take pictures with it to recieve a TTS (text-to-speech) descr
 * Open the project/root folder in linux (Ubuntu is recommended).
 * Navigate to /siloam directory (you should see lots of folders, like "components", "mobile", ).
 
-* Please verify that your /siloam/.env file looks something like this: (nano or cat it)
-![image](https://github.com/user-attachments/assets/d6023e1e-1eef-4a81-aef6-ca92196a977f)
+* Create your settings file from the example, then edit it. The example values work for trying the app on your own machine, but the OpenAI and OpenWeather features need your own keys.
+
+```bash
+cp .env.example .env
+```
 
 > You have two options at this point, (1) run our setup scripts or (2) setup manually.
 
@@ -250,7 +253,11 @@ Setup instructions:
 > These instructions are similar to Developer Instruction - Web App.
 - Once you have your own linux server up and running (see above), follow the same instructions as Developer Instruction - Web App.
 - You will need to modify your .env variable to use your devices ip as the url (or whatever server name you end-up configuring in Nginx, see below). Note, there are 2 .env files you will need to modify, one under the siloam/ folder and one under the mobile/ folder. 
-- We also recommend modifying the secret variables in your .env file (under siloam/), to ensure that the Salt Rounds, JWT Secret, and Custom File API key is unique to your deployment for security purposes. You will also need to sign up for an OpenAI account and register the corresponding OpenAI key in the .env file.
+- Create `siloam/.env` from `siloam/.env.example`, and replace every `REPLACE_ME` value before the site is reachable from the internet. The example is public, so its values give no protection.
+  - `JWT_SECRET`: generate your own with `openssl rand -base64 48`. Anyone who knows it can forge login tokens, including admin ones.
+  - `CUSTOM_FILE_API_KEY`: choose your own value. The website's JavaScript includes this key, so visitors can read it.
+  - `OPENAI_API_KEY` and `OPENWEATHER_API_KEY`: use keys from your own OpenAI and OpenWeather accounts.
+- If you're updating a server that used the old tracked `siloam/.env`, that file is no longer in this repository. Save a copy of your settings before pulling, because `git pull` either removes the file or stops with a conflict if you've edited it. Then restore your copy as `siloam/.env`.
 - Be sure the read the database section of the Developer instructions, as another reminder, do delete the old default admin credentials!
 - We recommend setting up a cron job to periodically delete stale image files. See the suggested crontab file provided under the siloam/scripts/ folder. For more details on cron, see this guide: https://www.digitalocean.com/community/tutorial-collections/how-to-use-cron-to-automate-tasks
 - In the .env file, you can also specify how long JWT tokens take before expriring. We use a access and refresh token system, where access tokens are short duration, and refresh tokens live longer to provide seamless access token refreshing.

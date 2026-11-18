@@ -186,7 +186,7 @@ export type CommentDownvoteGroupByOutputType = {
   _max: CommentDownvoteMaxAggregateOutputType | null
 }
 
-type GetCommentDownvoteGroupByPayload<T extends CommentDownvoteGroupByArgs> = Prisma.PrismaPromise<
+export type GetCommentDownvoteGroupByPayload<T extends CommentDownvoteGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<CommentDownvoteGroupByOutputType, T['by']> &
       {
@@ -1102,6 +1102,11 @@ export type CommentDownvoteFindManyArgs<ExtArgs extends runtime.Types.Extensions
    * Skip the first `n` CommentDownvotes.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of CommentDownvotes.
+   */
   distinct?: Prisma.CommentDownvoteScalarFieldEnum | Prisma.CommentDownvoteScalarFieldEnum[]
 }
 

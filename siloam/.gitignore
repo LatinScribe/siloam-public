@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Real settings stay out of git. Only the example is tracked.
+.env*
+!.env.example
