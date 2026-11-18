@@ -186,7 +186,7 @@ export type CommentUpvoteGroupByOutputType = {
   _max: CommentUpvoteMaxAggregateOutputType | null
 }
 
-type GetCommentUpvoteGroupByPayload<T extends CommentUpvoteGroupByArgs> = Prisma.PrismaPromise<
+export type GetCommentUpvoteGroupByPayload<T extends CommentUpvoteGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<CommentUpvoteGroupByOutputType, T['by']> &
       {
@@ -1102,6 +1102,11 @@ export type CommentUpvoteFindManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Skip the first `n` CommentUpvotes.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of CommentUpvotes.
+   */
   distinct?: Prisma.CommentUpvoteScalarFieldEnum | Prisma.CommentUpvoteScalarFieldEnum[]
 }
 

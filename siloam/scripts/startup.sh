@@ -16,7 +16,7 @@ sudo apt-get upgrade -y
 if ! command -v node &> /dev/null
 then
     echo "Node.js is not installed. Installing Node.js..."
-    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+    curl -fsSL https://deb.nodesource.com/setup_26.x | sudo -E bash -
     sudo apt-get install -y nodejs
 else
     echo "Node.js is already installed."

@@ -186,7 +186,7 @@ export type BlogPostUpvoteGroupByOutputType = {
   _max: BlogPostUpvoteMaxAggregateOutputType | null
 }
 
-type GetBlogPostUpvoteGroupByPayload<T extends BlogPostUpvoteGroupByArgs> = Prisma.PrismaPromise<
+export type GetBlogPostUpvoteGroupByPayload<T extends BlogPostUpvoteGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<BlogPostUpvoteGroupByOutputType, T['by']> &
       {
@@ -1102,6 +1102,11 @@ export type BlogPostUpvoteFindManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Skip the first `n` BlogPostUpvotes.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of BlogPostUpvotes.
+   */
   distinct?: Prisma.BlogPostUpvoteScalarFieldEnum | Prisma.BlogPostUpvoteScalarFieldEnum[]
 }
 
